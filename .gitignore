@@ -1,0 +1,6 @@
+.idea
+venv
+*__pycache__
+model/__pycache__
+api/__pycache__
+nginx/__pycache__

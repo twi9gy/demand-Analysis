@@ -1,0 +1,11 @@
+flask
+flask-cors
+gunicorn
+connexion[swagger-ui]
+pandas
+numpy
+statsmodels
+scipy
+sklearn
+openpyxl
+pmdarima

@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  api:
+    container_name: demand-analysis.local
+    restart: always
+    build: api
+    volumes: ['./api:/api']
+    networks:
+      - demandAnalysisNetwork
+      - gateway-api
+    expose:
+      - "5000"
+    ports:
+      - "5000:5000"
+  nginx-demand_analysis:
+    container_name: nginx-demand_analysis
+    restart: always
+    build: ./nginx
+    networks:
+      - demandAnalysisNetwork
+      - gateway-api
+    ports:
+      - "83:80"
+networks:
+  demandAnalysisNetwork:
+  gateway-api:
+    external:
+      name: purchaseplan_api_default

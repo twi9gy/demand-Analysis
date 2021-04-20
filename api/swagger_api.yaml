@@ -1,0 +1,144 @@
+---
+openapi: 3.0.0
+info:
+  description: Открытое API для работы с сервисом прогнозирования спроса
+  version: 1.0.0
+  title: Demand Analysis
+servers:
+- url: 'http://0.0.0.0:5000/api/v1'
+tags:
+- name: salesData
+  description: Информация о продажах за определенный период
+paths:
+  /hold_winter/prediction:
+    post:
+      tags:
+      - salesData
+      summary: Построение модели Холтера Винта для анализа и предсказания спроса.
+      description: Модель Холтера Винта для анализа и предсказания спроса.
+      operationId: api.hold_winter.prediction
+      parameters:
+      - name: freq
+        in: query
+        description: Частота прогнозирования (дни, недели, месяцы)
+        required: false
+        schema:
+          type: string
+      - name: column
+        in: query
+        description: Столбец в файле для анализа
+        required: false
+        schema:
+          type: string
+      - name: delimiter
+        in: query
+        description: Разделитель столбцов
+        required: false
+        schema:
+          type: string
+      - name: period
+        in: query
+        description: Период прогнозирования
+        required: false
+        schema:
+          type: number
+          format: int32
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/file'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/forecast'
+        '400':
+          description: unsuccessful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+  /arima/prediction:
+    post:
+      tags:
+        - salesData
+      summary: Построение модели ARIMA для анализа и предсказания спроса.
+      description: Модель ARIMA для анализа и предсказания спроса.
+      operationId: api.arima.prediction
+      parameters:
+        - name: freq
+          in: query
+          description: Частота прогнозирования (дни, недели, месяцы)
+          required: false
+          schema:
+            type: string
+        - name: column
+          in: query
+          description: Столбец в файле для анализа
+          required: false
+          schema:
+            type: string
+        - name: delimiter
+          in: query
+          description: Разделитель столбцов
+          required: false
+          schema:
+            type: string
+        - name: seasonal
+          in: query
+          description: Периодичность данных (4 - квартальные периоды, 12 - годовые периоды)
+          schema:
+            type: number
+            format: int32
+        - name: period
+          in: query
+          description: Период прогнозирования
+          required: false
+          schema:
+            type: number
+            format: int32
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/file'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/forecast'
+        '400':
+          description: unsuccessful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+components:
+  schemas:
+    file:
+      required:
+      - file
+      type: object
+      properties:
+        file:
+          type: string
+          description: Файл с информацией о продажах
+          format: binary
+    forecast:
+      type: object
+      properties:
+        error:
+          type: number
+          format: float
+        prediction:
+          type: object
+    inline_response_400:
+      properties:
+        message:
+          type: string
+
