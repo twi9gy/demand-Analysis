@@ -123,7 +123,7 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
 
                 return {
                            'prediction': result,
-                           'rmse': error
+                           'accuracy': error
                        }, 200
             else:
                 return jsonify({

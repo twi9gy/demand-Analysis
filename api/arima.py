@@ -80,15 +80,31 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                 # Получение прогноза
                 try:
                     # Построение модели
-                    model = create_model(arima.get_content(), pdq, seasonal_pdq)
-                    # Оценка точночти модели
-                    rmse = prediction_mse(model, arima.get_content())
-                    # Получение прогноза
-                    forecast_model = forecast(model, int(period))
+                    model = create_model(train, pdq, seasonal_pdq)
                 except Exception:
                     return jsonify({
                         'code': 403,
-                        'message': 'Ошибка при построении прогноза.'
+                        'message': 'Ошибка при построении модели.'
+                    })
+
+                # Оценка точности модели
+                try:
+                    # Оценка точности модели
+                    rmse = prediction_mse(model, train)
+                except Exception:
+                    return jsonify({
+                        'code': 403,
+                        'message': 'Ошибка при оценке точности модели.'
+                    })
+
+                # Получение прогноза
+                try:
+                    # Получение прогноза
+                    forecast_model = forecast(model, (int(period) + len(test)))[len(test):]
+                except Exception:
+                    return jsonify({
+                        'code': 403,
+                        'message': 'Ошибка при получение прогноза.'
                     })
 
                 # Формирование ответа
@@ -99,10 +115,10 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                     result[str(i)] = forecast_dict[i]
 
                 return {
-                           'prediction': result,
-                            'aic': model.aic,
-                            'rmse': rmse
-                       }, 200
+                   'prediction': result,
+                    'aic': model.aic,
+                    'accuracy': rmse
+                }, 200
             else:
                 return 'Файл не имеет расширения csv, xls или xlsx', 403
         return 'Метод имеет доступ POST', 403
