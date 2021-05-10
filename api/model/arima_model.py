@@ -2,6 +2,7 @@
 #   Библиотеки
 ##############################################
 import math
+import pandas as pd
 
 from pandas import read_csv, read_excel
 from statsmodels.tsa.stattools import adfuller
@@ -136,8 +137,7 @@ def search_params(series, period):
 def prediction_mse(model, series):
     pred_dynamic = model.get_prediction(start=series.index[0], dynamic=True, full_results=True)
     y_forecasted = pred_dynamic.predicted_mean
-    y_truth = series
-    rmse = math.sqrt(mean_squared_error(y_truth, y_forecasted))
+    rmse = math.sqrt(mean_squared_error(series, y_forecasted))
     return round(rmse, 2)
 
 

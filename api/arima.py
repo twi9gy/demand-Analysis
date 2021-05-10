@@ -90,7 +90,7 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                 # Оценка точности модели
                 try:
                     # Оценка точности модели
-                    rmse = prediction_mse(model, train)
+                    rmse= prediction_mse(model, train)
                 except Exception:
                     return jsonify({
                         'code': 403,
@@ -101,6 +101,11 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                 try:
                     # Получение прогноза
                     forecast_model = forecast(model, (int(period) + len(test)))[len(test):]
+
+                    # Определение точности предсказания в процентах
+                    y_forecast = forecast(model, len(test))
+                    diff = abs(test - y_forecast)
+                    percent_accuracy = diff / y_forecast
                 except Exception:
                     return jsonify({
                         'code': 403,
@@ -114,11 +119,25 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                 for i in forecast_dict.keys():
                     result[str(i)] = forecast_dict[i]
 
-                return {
-                   'prediction': result,
-                    'aic': model.aic,
-                    'accuracy': rmse
-                }, 200
+                # Формирование ответа
+                dict_data = arima.get_content().to_dict()
+                dict_data = dict_data[column]
+                keys = dict_data.keys()
+                data = {str(k): 0 for k in keys}
+                for i in dict_data.keys():
+                    data[str(i)] = dict_data[i]
+
+                return jsonify(
+                    accuracy=rmse,
+                    aic=model.aic,
+                    start_period_analysis=str(arima.get_content().index[0]),
+                    end_period_analysis=str(arima.get_content().index[-1]),
+                    start_period_forecast=str(forecast_model.index[0]),
+                    end_period_forecast=str(forecast_model.index[-1]),
+                    prediction=result,
+                    origin_data=data,
+                    percentage_accuracy=1 - percent_accuracy.mean()
+                ), 200
             else:
                 return 'Файл не имеет расширения csv, xls или xlsx', 403
         return 'Метод имеет доступ POST', 403

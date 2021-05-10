@@ -4,6 +4,7 @@
 import math
 
 from flask import request, jsonify
+import numpy as np
 from api.model.holdWinter_model import HoldWinter, HoldWinterCsv, HoldWinterXls, sampleDivision, tripleSmoothing, \
     searchOption, share
 from sklearn.metrics import mean_squared_error
@@ -121,10 +122,29 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                 for i in dict_forecast.keys():
                     result[str(i)] = dict_forecast[i]
 
-                return {
-                           'prediction': result,
-                           'accuracy': error
-                       }, 200
+                # Формирование ответа
+                dict_data = hold_w.get_content().to_dict()
+                dict_data = dict_data[column]
+                keys = dict_data.keys()
+                data = {str(k): 0 for k in keys}
+                for i in dict_data.keys():
+                    data[str(i)] = dict_data[i]
+
+                # Определение точности предсказания в процентах
+                forecast = model.forecast(len(test))
+                diff = abs(test - forecast)
+                percentage_accuracy = diff / forecast
+
+                return jsonify(
+                    accuracy=error,
+                    start_period_analysis=str(hold_w.get_content().index[0]),
+                    end_period_analysis=str(hold_w.get_content().index[-1]),
+                    start_period_forecast=str(forecast.index[0]),
+                    end_period_forecast=str(forecast.index[-1]),
+                    prediction=result,
+                    origin_data=data,
+                    percentage_accuracy= 1 - percentage_accuracy.mean()
+                ), 200
             else:
                 return jsonify({
                     'code': 403,
