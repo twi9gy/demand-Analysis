@@ -46,9 +46,9 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                         hold_w.read_file()
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка преобразования файла'
-                    })
+                    }), 400
 
                 # Деление выборки на тестовую и обучающую
                 try:
@@ -56,18 +56,18 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                     train, test = sampleDivision(hold_w.get_content(), column)
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка разделения выборки на обучающую и тестовую'
-                    })
+                    }), 400
 
                 # Поиск оптимальных параметров модели
                 try:
                     options, errors = searchOption(train, test, freq)
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка получения опций'
-                    })
+                    }), 400
 
                 # Сортировка моделей по ошибке
                 try:
@@ -75,45 +75,46 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                     list_errors.sort(key=lambda i: i[1])
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка поиска оптимальной модели'
-                    })
+                    }), 400
 
                 # Построение модели
                 try:
                     model = tripleSmoothing(train, options[list_errors[0][0]])
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка построения модели'
-                    })
+                    }), 400
 
                 # предсказание
                 try:
                     forecast = model.forecast(len(test))
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка прогнозирования спроса'
-                    })
+                    }), 400
 
                 # оценка точности предсказания
                 try:
                     error = math.sqrt(mean_squared_error(forecast, test))
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка подсчета ошибки прогноза'
-                    })
+                    }), 400
 
                 # предсказание на 30 периодов (дней, недель ...)
                 try:
-                    forecast = model.forecast(len(test)+period)[len(test):]
+                    forecast_count = len(test) + int(period)
+                    forecast = model.forecast(forecast_count)[len(test):]
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка прогнозирования спроса на следущий период'
-                    })
+                    }), 400
 
                 # Формирование ответа
                 dict_forecast = forecast.to_dict()
@@ -147,15 +148,15 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                 ), 200
             else:
                 return jsonify({
-                    'code': 403,
+                    'code': 400,
                     'message': 'Файл не имеет расширения csv или xls'
-                }), 403
+                }), 400
         return jsonify({
-            'code': 403,
+            'code': 400,
             'message': 'Метод имеет доступ POST'
-        }), 403
+        }), 400
     except Exception:
         return jsonify({
-                    'code': 403,
-                    'message': 'Непредвиденная ошибка'
-                }), 403
+            'code': 400,
+            'message': 'Непредвиденная ошибка'
+        }), 400

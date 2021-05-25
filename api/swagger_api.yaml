@@ -132,13 +132,46 @@ components:
     forecast:
       type: object
       properties:
-        error:
+        accuracy:
           type: number
           format: float
+          description: Среднеквадратичная ошибка rmse
+          example: 127.6
+        percentage_accuracy:
+          type: number
+          format: float
+          description: Точность прогноза в процентах
+          example: 0.6
+        start_period_analysis:
+          type: string
+          description: Дата начала анализа
+          example: 2020-10-03
+        end_period_analysis:
+          type: string
+          description: Дата окончания анализа
+          example: 2020-11-03
+        start_period_forecast:
+          type: string
+          description: Дата начала прогнозирования
+          example: 2020-11-04
+        end_period_forecast:
+          type: string
+          description: Дата окончания прогнозирования
+          example: 2020-12-04
         prediction:
           type: object
+          description: Прогнозируемая величина
+        origin_data:
+          type: object
+          description: Исходные данные для анализа
     inline_response_400:
       properties:
+        code:
+          type: number
+          format: int32
+          example: 400
+          description: Код ошибки
         message:
           type: string
+          description: Сообщение ошибки
 

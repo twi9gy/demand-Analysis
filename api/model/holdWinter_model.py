@@ -134,11 +134,11 @@ def generateOptions(freq):
     options = []
     for trend in TREND:
         for seasonal in SEASONAL:
-            for seasonal_periods in SEASONAL_PERIODS:
-                option = OptionsHoldWinter(trend=trend,
-                                           seasonal=seasonal,
-                                           seasonal_periods=int(seasonal_periods),
-                                           freq=freq)
+            for seasonal_period in SEASONAL_PERIODS:
+                option = OptionsHoldWinter(trend=str(trend),
+                                           seasonal=str(seasonal),
+                                           seasonal_periods=int(seasonal_period),
+                                           freq=str(freq))
                 options.append(option)
     return options
 
@@ -154,7 +154,7 @@ def searchOption(train, test, freq):
             if fit is not None:
                 forecast = fit.forecast(len(test))
                 errors[i] = mean_squared_error(forecast, test)
-            i = i + 1
         except Exception:
             continue
+        i += 1
     return options, errors

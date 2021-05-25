@@ -45,9 +45,9 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                         arima.read_file()
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка преобразования файла'
-                    })
+                    }), 400
 
                 # Деление выборки на тестовую и обучающую
                 try:
@@ -55,27 +55,27 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                     train, test = sampleDivision(arima.get_content(), column)
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка разделения выборки на обучающую и тестовую'
-                    })
+                    }), 400
 
                 # Поиск регрессионного параметра
                 try:
                     regress_param = search_regParam(train)
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка получения опций'
-                    })
+                    }), 400
 
                 # Поиск параметров модели
                 try:
                     pdq, seasonal_pdq, aic = search_params(train, seasonal)
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка при определении параметров модели.'
-                    })
+                    }), 400
 
                 # Получение прогноза
                 try:
@@ -83,19 +83,19 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                     model = create_model(train, pdq, seasonal_pdq)
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка при построении модели.'
-                    })
+                    }), 400
 
                 # Оценка точности модели
                 try:
                     # Оценка точности модели
-                    rmse= prediction_mse(model, train)
+                    rmse = prediction_mse(model, train)
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка при оценке точности модели.'
-                    })
+                    }), 400
 
                 # Получение прогноза
                 try:
@@ -108,9 +108,9 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                     percent_accuracy = diff / y_forecast
                 except Exception:
                     return jsonify({
-                        'code': 403,
+                        'code': 400,
                         'message': 'Ошибка при получение прогноза.'
-                    })
+                    }), 400
 
                 # Формирование ответа
                 forecast_dict = forecast_model.to_dict()
@@ -139,7 +139,16 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                     percentage_accuracy=1 - percent_accuracy.mean()
                 ), 200
             else:
-                return 'Файл не имеет расширения csv, xls или xlsx', 403
-        return 'Метод имеет доступ POST', 403
+                return jsonify({
+                    'code': 400,
+                    'message': 'Файл не имеет расширения csv, xls или xlsx'
+                }), 400
+        return jsonify({
+            'code': 400,
+            'message': 'Метод имеет доступ POST'
+        }), 400
     except Exception:
-        return 'Exception', 403
+        return jsonify({
+            'code': 400,
+            'message': 'Непредвиденная ошибка'
+        }), 400
