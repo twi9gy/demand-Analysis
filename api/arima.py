@@ -4,6 +4,7 @@
 import math
 
 from flask import request, jsonify
+from sklearn.metrics import accuracy_score
 
 from api.model.arima_model import ARIMACsv, ARIMAXls, search_regParam, search_params, create_model, prediction_mse, \
     forecast

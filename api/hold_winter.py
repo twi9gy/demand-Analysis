@@ -8,6 +8,7 @@ import numpy as np
 from api.model.holdWinter_model import HoldWinter, HoldWinterCsv, HoldWinterXls, sampleDivision, tripleSmoothing, \
     searchOption, share
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import accuracy_score
 import json
 
 ##############################################
@@ -132,9 +133,9 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                     data[str(i)] = dict_data[i]
 
                 # Определение точности предсказания в процентах
-                forecast = model.forecast(len(test))
-                diff = abs(test - forecast)
-                percentage_accuracy = diff / forecast
+                y_forecast = model.forecast(len(test))
+                diff = abs(test - y_forecast)
+                percentage_accuracy = diff / y_forecast
 
                 return jsonify(
                     accuracy=error,
@@ -144,7 +145,7 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                     end_period_forecast=str(forecast.index[-1]),
                     prediction=result,
                     origin_data=data,
-                    percentage_accuracy= 1 - percentage_accuracy.mean()
+                    percentage_accuracy=1 - percentage_accuracy.mean()
                 ), 200
             else:
                 return jsonify({
