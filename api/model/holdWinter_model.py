@@ -2,10 +2,12 @@
 #   Библиотеки
 ##############################################
 
+import numpy as np
 import pandas as pd
 from pandas import read_csv, read_excel
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
 from api.model.ModelException import ModelException
 
 # from api.model.ModelException import ModelException
@@ -158,3 +160,11 @@ def searchOption(train, test, freq):
             continue
         i += 1
     return options, errors
+
+
+def get_mean_absolute_error(y_true, y_pred):
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    mape = np.abs(mean_absolute_error(y_true, y_pred)) * 100
+    while mape > 100:
+        mape /= 100
+    return mape

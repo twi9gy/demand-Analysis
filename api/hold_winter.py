@@ -4,9 +4,9 @@
 import math
 
 from flask import request, jsonify
-import numpy as np
+
 from api.model.holdWinter_model import HoldWinter, HoldWinterCsv, HoldWinterXls, sampleDivision, tripleSmoothing, \
-    searchOption, share
+    searchOption, share, get_mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import accuracy_score
 import json
@@ -134,8 +134,7 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
 
                 # Определение точности предсказания в процентах
                 y_forecast = model.forecast(len(test))
-                diff = abs(test - y_forecast)
-                percentage_accuracy = diff / y_forecast
+                mape = get_mean_absolute_error(test, y_forecast)
 
                 return jsonify(
                     accuracy=error,
@@ -145,7 +144,7 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                     end_period_forecast=str(forecast.index[-1]),
                     prediction=result,
                     origin_data=data,
-                    percentage_accuracy=1 - percentage_accuracy.mean()
+                    percentage_accuracy=100 - mape
                 ), 200
             else:
                 return jsonify({

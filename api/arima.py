@@ -2,13 +2,14 @@
 #   Библиотеки
 ##############################################
 import math
-
+import numpy as np
 from flask import request, jsonify
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import mean_absolute_error
 
 from api.model.arima_model import ARIMACsv, ARIMAXls, search_regParam, search_params, create_model, prediction_mse, \
     forecast
-from api.model.holdWinter_model import sampleDivision, share
+from api.model.holdWinter_model import sampleDivision, share, get_mean_absolute_error
 
 ##############################################
 #   Глобальные переменные
@@ -105,12 +106,11 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
 
                     # Определение точности предсказания в процентах
                     y_forecast = forecast(model, len(test))
-                    diff = abs(test - y_forecast)
-                    percent_accuracy = diff / y_forecast
+                    mape = get_mean_absolute_error(test, y_forecast)
                 except Exception:
                     return jsonify({
                         'code': 400,
-                        'message': 'Ошибка при получение прогноза.'
+                        'message': 'Ошибка при получении прогноза.'
                     }), 400
 
                 # Формирование ответа
@@ -137,7 +137,7 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                     end_period_forecast=str(forecast_model.index[-1]),
                     prediction=result,
                     origin_data=data,
-                    percentage_accuracy=1 - percent_accuracy.mean()
+                    percentage_accuracy=100 - mape
                 ), 200
             else:
                 return jsonify({
