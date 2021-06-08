@@ -111,6 +111,11 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                 try:
                     forecast_count = len(test) + int(period)
                     forecast = model.forecast(forecast_count)[len(test):]
+
+                    for i in range(len(forecast)):
+                        if forecast[i] < 0:
+                            forecast[i] = 0
+
                 except Exception:
                     return jsonify({
                         'code': 400,
