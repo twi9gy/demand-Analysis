@@ -21,7 +21,7 @@ services:
       - demandAnalysisNetwork
       - gateway-api
     ports:
-      - "83:80"
+      - "82:80"
 networks:
   demandAnalysisNetwork:
   gateway-api:

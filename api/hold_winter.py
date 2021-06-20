@@ -149,7 +149,7 @@ def prediction(file, freq='D', column='Sale', delimiter=',', period=30):
                     end_period_forecast=str(forecast.index[-1]),
                     prediction=result,
                     origin_data=data,
-                    percentage_accuracy=100 - mape
+                    percentage_accuracy=(100 - mape)/100
                 ), 200
             else:
                 return jsonify({

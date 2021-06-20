@@ -4,7 +4,7 @@ CONSOLE=$(PHP) bin/console
 COMPOSER=$(PHP) composer
 
 up:
-	@${COMPOSE} up
+	@${COMPOSE} up -d
 
 down:
 	@${COMPOSE} down

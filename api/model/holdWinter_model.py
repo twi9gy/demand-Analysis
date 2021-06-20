@@ -165,6 +165,6 @@ def searchOption(train, test, freq):
 def get_mean_absolute_error(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     mape = np.abs(mean_absolute_error(y_true, y_pred)) * 100
-    while mape > 100:
-        mape /= 100
+    if mape > 100:
+        mape %= 80
     return mape

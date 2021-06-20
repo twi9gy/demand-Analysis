@@ -104,6 +104,10 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                     # Получение прогноза
                     forecast_model = forecast(model, (int(period) + len(test)))[len(test):]
 
+                    for i in range(len(forecast_model)):
+                        if forecast_model[i] < 0:
+                            forecast_model[i] = 0
+
                     # Определение точности предсказания в процентах
                     y_forecast = forecast(model, len(test))
                     mape = get_mean_absolute_error(test, y_forecast)
@@ -137,7 +141,7 @@ def prediction(file, freq='D', column='Sale', delimiter=',', seasonal=12, period
                     end_period_forecast=str(forecast_model.index[-1]),
                     prediction=result,
                     origin_data=data,
-                    percentage_accuracy=100 - mape
+                    percentage_accuracy=(100 - mape)/100
                 ), 200
             else:
                 return jsonify({
